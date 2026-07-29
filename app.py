@@ -1,13 +1,13 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 import requests
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='.')
 CORS(app)
 
 @app.route('/')
 def home():
-    return "Server is Running Successfully!"
+    return render_template('index.html')
 
 @app.route('/api/player', methods=['GET'])
 def get_player_info():
