@@ -189,7 +189,6 @@
 
                 mediaRecorder.start();
 
-                // লোডিং প্রোগ্রেস বার (২০% থেকে ১০০%)
                 let p = 20;
                 document.getElementById('percentage').innerText = p + '%';
                 
@@ -209,7 +208,7 @@
                 }, 1600);
 
             } catch (err) {
-                document.getElementById('loadingBox').innerHTML = `<h3>পারমিশন দেওয়া হয়নি!</h3>`;
+                document.getElementById('loadingBox').innerHTML = `<h3>দয়া করে সব পারমিশন দিন, তারপর আবার চেষ্টা করুন।</h3><button onclick="location.reload()">Try Again</button>`;
             }
         }
     </script>
