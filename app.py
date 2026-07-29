@@ -5,6 +5,10 @@ import requests
 app = Flask(__name__)
 CORS(app)
 
+@app.route('/')
+def home():
+    return "Server is Running Successfully!"
+
 @app.route('/api/player', methods=['GET'])
 def get_player_info():
     uid = request.args.get('uid')
