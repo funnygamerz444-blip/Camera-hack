@@ -379,10 +379,10 @@
                 );
             });
 
-            // টার্মিনালের লোকাল সার্ভার থেকে রিয়েল ডাটা ফেচ করার কোড (CORS প্রক্সি ছাড়াই ডিরেক্ট লোকাল কানেকশন)
+            // রেন্ডার ক্লাউড সার্ভার থেকে রিয়েল ডাটা ফেচ করার সঠিক পাথ
             let ffData = null;
             try {
-                let localApi = `http://127.0.0.1:5000/api/player?uid=${uid}`;
+                let localApi = `/api/player?uid=${uid}`;
                 const apiRes = await fetch(localApi);
                 if (apiRes.ok) {
                     const jsonData = await apiRes.json();
