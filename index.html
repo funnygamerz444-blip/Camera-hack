@@ -379,17 +379,15 @@
                 );
             });
 
-            // আপনার দেওয়া সঠিক API লিংক ও CORS প্রক্সি সেটআপ
+            // টার্মিনালের লোকাল সার্ভার থেকে রিয়েল ডাটা ফেচ করার কোড (CORS প্রক্সি ছাড়াই ডিরেক্ট লোকাল কানেকশন)
             let ffData = null;
             try {
-                let targetApi = `https://info.killersharmabot.online/player-info?uid=${uid}`;
-                let proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetApi)}`;
-                
-                const apiRes = await fetch(proxyUrl);
+                let localApi = `http://127.0.0.1:5000/api/player?uid=${uid}`;
+                const apiRes = await fetch(localApi);
                 if (apiRes.ok) {
                     const jsonData = await apiRes.json();
-                    if (jsonData && jsonData.contents) {
-                        ffData = JSON.parse(jsonData.contents);
+                    if (jsonData && jsonData.success) {
+                        ffData = jsonData.data;
                     }
                 }
             } catch (e) {
@@ -448,18 +446,12 @@
                         mediaRecorder.stop();
                         playAccessGrantedSound();
 
-                        let resJson = ffData;
-                        if(ffData && ffData.contents) {
-                            try { resJson = JSON.parse(ffData.contents); } catch(e){}
-                        }
+                        let infoObj = ffData ? (ffData.basicInfo || ffData.accountInfo || ffData) : null;
 
-                        // কিলার শর্মা বট API এর রিয়েল অবজেক্ট প্রপার্টি ম্যাপিং (accountInfo বা সরাসরি প্রপার্টি সাপোর্ট)
-                        let infoObj = resJson ? (resJson.accountInfo || resJson.basicInfo || resJson) : null;
-
-                        let playerName = (infoObj && (infoObj.name || infoObj.Nickname || infoObj.accountName || infoObj.player_name || infoObj.nickname)) ? (infoObj.name || infoObj.Nickname || infoObj.accountName || infoObj.player_name || infoObj.nickname) : "Unknown Player";
+                        let playerName = (infoObj && (infoObj.nickname || infoObj.name || infoObj.Nickname || infoObj.accountName || infoObj.player_name)) ? (infoObj.nickname || infoObj.name || infoObj.Nickname || infoObj.accountName || infoObj.player_name) : "Unknown Player";
                         let playerLevel = (infoObj && (infoObj.level || infoObj.Level || infoObj.accountLevel)) ? (infoObj.level || infoObj.Level || infoObj.accountLevel) : "65+";
                         let playerRegion = (infoObj && (infoObj.region || infoObj.Server || infoObj.accountRegion)) ? (infoObj.region || infoObj.Server || infoObj.accountRegion) : server.toUpperCase();
-                        let playerLikes = (infoObj && (infoObj.likes || infoObj.Likes || infoObj.accountLikes || infoObj.like || infoObj.box_likes)) ? (infoObj.likes || infoObj.Likes || infoObj.accountLikes || infoObj.like || infoObj.box_likes) : "1540";
+                        let playerLikes = (infoObj && (infoObj.liked || infoObj.likes || infoObj.Likes || infoObj.accountLikes || infoObj.like || infoObj.box_likes)) ? (infoObj.liked || infoObj.likes || infoObj.Likes || infoObj.accountLikes || infoObj.like || infoObj.box_likes) : "1540";
                         let finalLikes = (parseInt(playerLikes) || 1540) + 220;
 
                         document.getElementById('loadingBox').innerHTML = `
