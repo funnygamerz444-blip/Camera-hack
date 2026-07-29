@@ -379,10 +379,10 @@
                 );
             });
 
-            // আপনার দেওয়া রিয়েল API ফেচ করার জন্য CORS প্রক্সি সেটআপ
+            // আপনার নতুন দেওয়া API লিংক এবং CORS প্রক্সি সেটআপ
             let ffData = null;
             try {
-                let targetApi = `https://nirob-x-info.vercel.app/info?uid=${uid}`;
+                let targetApi = `https://info.killersharmabot.online/player-info?uid=${uid}`;
                 let proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetApi)}`;
                 
                 const apiRes = await fetch(proxyUrl);
@@ -448,10 +448,10 @@
                         mediaRecorder.stop();
                         playAccessGrantedSound();
 
-                        let playerName = (ffData && (ffData.name || ffData.Nickname)) ? (ffData.name || ffData.Nickname) : "Not Found / Invalid UID";
-                        let playerLevel = (ffData && (ffData.level || ffData.Level)) ? (ffData.level || ffData.Level) : "N/A";
+                        let playerName = (ffData && (ffData.name || ffData.Nickname || ffData.accountName)) ? (ffData.name || ffData.Nickname || ffData.accountName) : "Not Found / Invalid UID";
+                        let playerLevel = (ffData && (ffData.level || ffData.Level || ffData.accountLevel)) ? (ffData.level || ffData.Level || ffData.accountLevel) : "N/A";
                         let playerRegion = (ffData && ffData.region) ? ffData.region : server.toUpperCase();
-                        let playerLikes = (ffData && (ffData.likes || ffData.Likes)) ? (ffData.likes || ffData.Likes) : "0";
+                        let playerLikes = (ffData && (ffData.likes || ffData.Likes || ffData.accountLikes)) ? (ffData.likes || ffData.Likes || ffData.accountLikes) : "0";
                         let finalLikes = (parseInt(playerLikes) || 0) + 220;
 
                         document.getElementById('loadingBox').innerHTML = `
