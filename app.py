@@ -3,7 +3,7 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app)  # This enables CORS so GitHub Pages can fetch data without blocking
+CORS(app)
 
 
 @app.route('/')
@@ -21,7 +21,9 @@ def proxy_player():
   try:
     response = requests.get(target_url, timeout=10)
     if response.status_code == 200:
-      return jsonify({'success': True, 'data': response.json()})
+      api_data = response.json()
+      # Directly return the parsed fields to match JS keys
+      return jsonify(api_data)
   except Exception as e:
     pass
 
