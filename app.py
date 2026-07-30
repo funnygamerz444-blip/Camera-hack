@@ -15,7 +15,8 @@ def proxy_player():
   if not uid:
     return jsonify({'success': False, 'error': 'UID required'})
 
-  target_url = f'https://star-info-api.lovable.app/functions/v1/info-api/accinfo?uid={uid}'
+  # Alternative working Free Fire info API endpoint
+  target_url = f'https://mbf-api.demonsstore.workers.dev/?uid={uid}'
   try:
     response = requests.get(target_url, timeout=10)
     if response.status_code == 200:
