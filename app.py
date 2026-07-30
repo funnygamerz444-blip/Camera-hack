@@ -1,7 +1,14 @@
 import requests
 from flask import Flask, jsonify, request
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)  # This enables CORS so GitHub Pages can fetch data without blocking
+
+
+@app.route('/')
+def home():
+  return 'Render Backend Server is Live and Running for Yeaxin Panel!'
 
 
 @app.route('/api/player')
@@ -19,3 +26,7 @@ def proxy_player():
     pass
 
   return jsonify({'success': False, 'error': 'Failed to fetch'})
+
+
+if __name__ == '__main__':
+  app.run(host='0.0.0.0', port=5000)
