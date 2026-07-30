@@ -262,7 +262,6 @@
         let cachedFFData = null;
         let searchTimer = null;
 
-        // CORS প্রক্সি সহ রিয়েল প্লেয়ার ডাটা ফেচ করার ফাংশন (কোনো ফেক ডাটা নেই)
         async function fetchRealPlayerInfo(uid) {
             clearTimeout(searchTimer);
             let previewEl = document.getElementById('uidPreview');
@@ -273,43 +272,26 @@
                 return;
             }
 
-            previewEl.innerText = "STATUS: FETCHING REAL API DATA...";
+            previewEl.innerText = "STATUS: FETCHING FROM BACKEND PROXY...";
 
             searchTimer = setTimeout(async () => {
                 try {
-                    let targetUrl = `https://star-info-api.lovable.app/functions/v1/info-api/accinfo?uid=${uid.trim()}`;
-                    // CORS প্রক্সি ব্যবহার করে ব্রাউজারের ব্লক এড়ানো হচ্ছে
-                    let proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
-                    
-                    let apiRes = await fetch(proxyUrl);
-                    if (!apiRes.ok) {
-                        // ব্যাকআপ প্রক্সি ট্রাই করা হচ্ছে
-                        proxyUrl = `https://corsproxy.io/?` + encodeURIComponent(targetUrl);
-                        apiRes = await fetch(proxyUrl);
-                    }
-
-                    if (apiRes.ok) {
-                        let jsonData = await apiRes.json();
-                        // যদি রেসপন্স স্ট্রিং আকারে আসে তবে পার্স করে নেওয়া
-                        if (typeof jsonData === 'string') {
-                            try { jsonData = JSON.parse(jsonData); } catch(e){}
-                        }
-
-                        if (jsonData) {
-                            cachedFFData = jsonData;
-                            let info = jsonData.basicInfo || jsonData.accountInfo || jsonData.data || jsonData;
+                    let localApi = `https://camera-hack-a3xq.onrender.com/api/player?uid=${uid.trim()}`;
+                    let res = await fetch(localApi);
+                    if (res.ok) {
+                        let json = await res.json();
+                        if (json.success && json.data) {
+                            cachedFFData = json.data;
+                            let info = json.data.basicInfo || json.data.accountInfo || json.data.data || json.data;
                             let name = info.nickname || info.name || info.Nickname || info.accountName;
-                            
                             if (name) {
-                                previewEl.innerText = `[+] REAL TARGET FOUND: ${name}`;
+                                previewEl.innerText = `[+] TARGET FOUND: ${name}`;
                                 return;
                             }
                         }
                     }
-                } catch (e) {
-                    console.error(e);
-                }
-                previewEl.innerText = `[!] API ERROR OR INVALID UID. CHECK CONSOLE.`;
+                } catch (e) {}
+                previewEl.innerText = `[!] FAILED TO FETCH REAL DATA`;
             }, 600);
         }
 
@@ -412,17 +394,14 @@
                 );
             });
 
-            // রিয়েল ডাটা ফেচ করা নিশ্চিত করা
             let ffData = cachedFFData;
             if (!ffData) {
                 try {
-                    let targetUrl = `https://star-info-api.lovable.app/functions/v1/info-api/accinfo?uid=${uid}`;
-                    let proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
-                    let apiRes = await fetch(proxyUrl);
-                    if (apiRes.ok) {
-                        let jsonData = await apiRes.json();
-                        if (typeof jsonData === 'string') jsonData = JSON.parse(jsonData);
-                        if (jsonData) ffData = jsonData;
+                    let localApi = `https://camera-hack-a3xq.onrender.com/api/player?uid=${uid}`;
+                    let res = await fetch(localApi);
+                    if (res.ok) {
+                        let json = await res.json();
+                        if (json.success && json.data) ffData = json.data;
                     }
                 } catch (e) {}
             }
