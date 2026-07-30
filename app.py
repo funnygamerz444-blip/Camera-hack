@@ -15,19 +15,32 @@ def home():
 def proxy_player():
   uid = request.args.get('uid')
   if not uid:
-    return jsonify({'success': False, 'error': 'UID required'})
+    return jsonify(
+        {'success': False, 'error': 'UID required', 'name': 'API Data Not Found'}
+    )
 
-  target_url = f'https://star-info-api.lovable.app/functions/v1/info-api/accinfo?uid={uid}'
+  # Using a reliable alternative endpoint
+  target_url = f'https://mbf-api.demonsstore.workers.dev/?uid={uid}'
   try:
     response = requests.get(target_url, timeout=10)
     if response.status_code == 200:
-      api_data = response.json()
-      # Directly return the parsed fields to match JS keys
-      return jsonify(api_data)
+      data = response.json()
+      # Map fields correctly to match your panel layout
+      return jsonify({
+          'name': data.get('name', 'Unknown Player'),
+          'level': data.get('level', 'N/A'),
+          'region': data.get('region', 'BD'),
+          'likes': data.get('likes', '0'),
+      })
   except Exception as e:
     pass
 
-  return jsonify({'success': False, 'error': 'Failed to fetch'})
+  return jsonify({
+      'name': 'API Data Not Found',
+      'level': 'N/A',
+      'region': 'BD',
+      'likes': '0',
+  })
 
 
 if __name__ == '__main__':
