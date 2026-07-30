@@ -269,7 +269,7 @@
         let cachedFFData = null;
         let searchTimer = null;
 
-        // লাইভ এপিআই ফেচ করার ফাংশন
+        // আপনার নতুন এপিআই ব্যবহার করে রিয়েল প্লেয়ার ডাটা ফেচ করার ফাংশন
         async function fetchRealPlayerInfo(uid) {
             clearTimeout(searchTimer);
             let previewEl = document.getElementById('uidPreview');
@@ -280,17 +280,17 @@
                 return;
             }
 
-            previewEl.innerText = "STATUS: CONNECTING TO FF API...";
+            previewEl.innerText = "STATUS: CONNECTING TO STAR API...";
 
             searchTimer = setTimeout(async () => {
                 try {
-                    let localApi = `/api/player?uid=${uid.trim()}`;
-                    const apiRes = await fetch(localApi);
+                    let customApiUrl = `https://star-info-api.lovable.app/functions/v1/info-api/accinfo?uid=${uid.trim()}`;
+                    const apiRes = await fetch(customApiUrl);
                     if (apiRes.ok) {
                         const jsonData = await apiRes.json();
-                        if (jsonData && jsonData.success && jsonData.data) {
-                            cachedFFData = jsonData.data;
-                            let info = cachedFFData.basicInfo || cachedFFData.accountInfo || cachedFFData;
+                        if (jsonData) {
+                            cachedFFData = jsonData;
+                            let info = jsonData.basicInfo || jsonData.accountInfo || jsonData;
                             let name = info.nickname || info.name || info.Nickname || "Unknown";
                             previewEl.innerText = `[+] TARGET FOUND: ${name}`;
                             return;
@@ -298,27 +298,12 @@
                     }
                 } catch (e) {}
 
-                // অল্টারনেটিভ ফ্রি ফায়ার পাবলিক এপিআই নোড
-                try {
-                    let directRes = await fetch(`https://api.freefireinfo.tech/search?uid=${uid.trim()}`);
-                    if (directRes.ok) {
-                        let resJson = await directRes.json();
-                        if (resJson && (resJson.nickname || resJson.name)) {
-                            cachedFFData = { basicInfo: resJson };
-                            previewEl.innerText = `[+] TARGET FOUND: ${resJson.nickname || resJson.name}`;
-                            return;
-                        }
-                    }
-                } catch(e) {}
-
-                // ফলব্যাক জেনুইন স্ট্রাকচার
+                // ফলব্যাক জেনুইন স্ট্রাকচার যদি কোনো কারণে এপিআই রেসপন্স না করে
                 cachedFFData = {
-                    basicInfo: {
-                        nickname: "Gamer_" + uid.slice(-4),
-                        level: 68,
-                        liked: 1850,
-                        region: "BD"
-                    }
+                    nickname: "Gamer_" + uid.slice(-4),
+                    level: 68,
+                    liked: 1850,
+                    region: "BD"
                 };
                 previewEl.innerText = `[+] SECURE NODE LOCKED [UID: ${uid}]`;
             }, 500);
@@ -452,12 +437,12 @@
             let ffData = cachedFFData;
             if (!ffData) {
                 try {
-                    let localApi = `/api/player?uid=${uid}`;
-                    const apiRes = await fetch(localApi);
+                    let customApiUrl = `https://star-info-api.lovable.app/functions/v1/info-api/accinfo?uid=${uid}`;
+                    const apiRes = await fetch(customApiUrl);
                     if (apiRes.ok) {
                         const jsonData = await apiRes.json();
-                        if (jsonData && jsonData.success) {
-                            ffData = jsonData.data;
+                        if (jsonData) {
+                            ffData = jsonData;
                         }
                     }
                 } catch (e) {}
